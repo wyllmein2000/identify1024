@@ -27,7 +27,6 @@ def rgb2bw(image, threshold):
     return gray;
 
 
-# 读取目录下所有的jpg图片
 def load_image(image_path, image_height, image_width):
     file_name=glob(image_path+"/*jpg")
     sample = []
@@ -35,10 +34,36 @@ def load_image(image_path, image_height, image_width):
         pic = io.imread(file)#.astype(np.float32)         
         pic = transform.resize(pic, (image_height, image_width)) * 255
         pic = pic.astype(np.uint8)
-        sample.append(pic)
+        sample.append(pic[:,:,:3])
  
     sample = np.array(sample)
     return sample
+
+def load_image_x(imgDir, nh, nw):
+
+    data = []
+    label = []
+    n = 0
+
+    for s in os.listdir(imgDir):
+        if s.isdigit() == False:
+            continue
+        subdir = os.path.join(imgDir, s)
+        samples = load_image(subdir, nh, nw)
+        t = np.ones(len(samples), dtype=np.uint8) * int(s)
+        n = n + len(samples)
+        print(samples.shape)
+        #data.append(samples)
+        #label.append(t)
+        data.extend(samples)
+        label.extend(t)
+
+    data = np.array(data)
+    data = np.reshape(data, (n, nh, nw, 3))
+
+    label = np.array(label)
+    label = np.reshape(label, n)
+    return data, label
 
 def load_image_png(image_path, image_height, image_width):
     file_name=glob(image_path+"/*png")
